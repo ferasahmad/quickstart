@@ -143,6 +143,11 @@ export interface ErrorDataItem {
   status_code: number | null;
 }
 
+interface FiscalResponsibilityScoreDataItem {
+  accountName: string;
+  fiscalResponsibilityScore: string;
+}
+
 //all possible product data interfaces
 export type DataItem =
   | AuthDataItem
@@ -159,7 +164,8 @@ export type DataItem =
   | TransferAuthorizationDataItem
   | IncomePaystubsDataItem
   | SignalDataItem
-  | StatementsDataItem;
+  | StatementsDataItem
+  | FiscalResponsibilityScoreDataItem;
 
 export type Data = Array<DataItem>;
 
@@ -194,6 +200,17 @@ export const transactionsCategories: Array<Categories> = [
   {
     title: "Date",
     field: "date",
+  },
+];
+
+export const fiscalResponsibilityScoreCategories: Array<Categories> = [
+  {
+    title: "Account Name",
+    field: "accountName",
+  },
+  {
+    title: "Fiscal Responsibility Score",
+    field: "fiscalResponsibilityScore",
   },
 ];
 
@@ -439,14 +456,14 @@ export const signalCategories: Array<Categories> = [
 ];
 
 export const statementsCategories: Array<Categories> = [
-  { 
+  {
     title: "Account name",
-    field: "account"
+    field: "account",
   },
   {
     title: "Statement Date",
-    field: "date"
-  }
+    field: "date",
+  },
 ];
 
 export const incomePaystubsCategories: Array<Categories> = [
@@ -481,12 +498,17 @@ export const transformAuthData = (data: AuthGetResponse) => {
   });
 };
 
-export const transformStatementsData = (data: {json: StatementsListResponse}) => {
+export const transformStatementsData = (data: {
+  json: StatementsListResponse;
+}) => {
   const account = data.json.accounts[0]!.account_name;
   const statements = data.json.accounts[0]!.statements;
   return statements!.map((s) => {
     const item: DataItem = {
-      date: Intl.DateTimeFormat('en', { month: 'long', year:'numeric' }).format(new Date(s.year!, s.month!)),
+      date: Intl.DateTimeFormat("en", {
+        month: "long",
+        year: "numeric",
+      }).format(new Date(s.year!, s.month!)),
       account: account,
     };
     return item;
@@ -504,6 +526,15 @@ export const transformTransactionsData = (data: {
     };
     return item;
   });
+};
+
+export const transformFiscalResponsibilityScoreData = (
+  data: { accountName: string; fiscalResponsibilityScore: string }[]
+) => {
+  return data.map((item) => ({
+    accountName: item.accountName,
+    fiscalResponsibilityScore: `${item.fiscalResponsibilityScore}%`,
+  }));
 };
 
 interface IdentityData {
